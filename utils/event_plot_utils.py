@@ -126,18 +126,18 @@ def EventDisplay( tubes, quantities, PMTFlatMapPositive, title="Charge", cutrang
     tubes == np.array of PMTs that were hit
     quantities == np.array of PMT quantities (either charge or time)
     title == title to add to display
-    cutrange == minimum and maximum values on plot (or set both same for default)
+    cutrange == minimum and maximum values on plot (or set both -1 for default)
     """
     
     fig, ax= plt.subplots(figsize=[30,30])
     preimage = np.zeros( preimage_dimensions )
     
-    imgmin = quantities.min()
-    imgmax = quantities.max()
+    imgmin = quantities.min() if cutrange[0] == -1 else cutrange[0]
+    imgmax = quantities.max() if cutrange[1] == -1 else cutrange[1]
 
     for idx, tube in enumerate( tubes ):
-        if cutrange[0] != cutrange[1]:
-            if quantities[idx] < cutrange[0] or quantities[idx] > cutrange[1]:
+        if (cutrange[0] != -1 and quantities[idx] < cutrange[0]) or \
+            (cutrange[1] != -1 and quantities[idx] > cutrange[1]):
                 continue
         for dx in range(-3,4):
             for dy in range(-3,4):
@@ -146,10 +146,6 @@ def EventDisplay( tubes, quantities, PMTFlatMapPositive, title="Charge", cutrang
                     
                 #print( "idx=", idx, " len(quantities)=",len(quantities), " tube=", tube, " len(PMTFlatMap)=", len(PMTFlatMapPositive))
                 preimage[ PMTFlatMapPositive[tube][1]+dx, PMTFlatMapPositive[tube][0]+dy ] = quantities[idx]
-
-    if cutrange[0] != cutrange[1]:
-        imgmin = cutrange[0]
-        imgmax = cutrange[1]
     
     im = ax.imshow( preimage, extent = [-positive_x_offset,positive_x_offset,-lower_endcap_offset,lower_endcap_offset], vmin=imgmin, vmax=imgmax )
 
@@ -222,7 +218,7 @@ def EventSubsetDisplay( tubes, quantities, PMTFlatMapPositive, tubes_to_plot, ti
     tubes == np.array of PMTs that were hit
     quantities == np.array of PMT quantities (either charge or time)
     title == title to add to display
-    cutrange == minimum and maximum values on plot (or set both same for default)
+    cutrange == minimum and maximum values on plot (or set both -1 for default)
     """
     PMTFlatMapPositive_values = [PMTFlatMapPositive[tube] for tube in tubes_to_plot]
     subset_x_values = np.array([value[0] for value in PMTFlatMapPositive_values])
@@ -241,7 +237,8 @@ def EventSubsetDisplay( tubes, quantities, PMTFlatMapPositive, tubes_to_plot, ti
     subset_quantities = []
     for idx, tube in enumerate( tubes ):
         if cutrange[0] != cutrange[1]:
-            if quantities[idx] < cutrange[0] or quantities[idx] > cutrange[1]:
+            if (cutrange[0] != -1 and quantities[idx] < cutrange[0]) or \
+                (cutrange[1] != -1 and quantities[idx] > cutrange[1]):
                 continue
         for dx in range(-3,4):
             for dy in range(-3,4):
@@ -254,12 +251,9 @@ def EventSubsetDisplay( tubes, quantities, PMTFlatMapPositive, tubes_to_plot, ti
     
     subset_quantities = np.array(subset_quantities)
 
-    imgmin = subset_quantities.min()
-    imgmax = subset_quantities.max()
+    imgmin = subset_quantities.min() if cutrange[0] == -1 else cutrange[0]
+    imgmax = subset_quantities.max() if cutrange[1] == -1 else cutrange[1]
     
-    if cutrange[0] != cutrange[1]:
-        imgmin = cutrange[0]
-        imgmax = cutrange[1]
     
     subset_image = preimage[min_subplot_y_value:max_subplot_y_value, min_subplot_x_value:max_subplot_x_value]
     
